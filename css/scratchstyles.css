@@ -1,0 +1,106 @@
+/* Astrophotography Stylesheet */
+
+/* --- Custom Background Color --- */
+body {
+    /* Set a dark background color suitable for an astronomy theme */
+    background-color: #0047BA; /* Dark purple/blue */
+    color: #ffffff; /* White font color for readability */
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif; /* Specified font family */
+    line-height: 1.6;
+    margin: 0; /* Remove default body margin */
+}
+
+/* --- Style Definition 1: Header H1 --- */
+h1 {
+    color: #ffffff; /* Off White font color */
+    text-align: center;
+    padding-top: 5px;
+    font-size: 4.5em;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif; /* Specified font family */
+}
+
+/* --- Style Definition 2: Subtitle Class --- */
+.subtitle {
+    color: #ebebeb; /* Silver font color */
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+/* --- Style Definition 3: General Paragraph and List Font --- */
+p, li {
+    font-size: 1.1em;
+    color: #ebecf7; /* Off-white font color */
+}
+
+/* --- Style Definition 4: Anchor Links --- */
+a {
+    color: #ebebeb; /* Vibrant green font color */
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #0047BA;
+    text-decoration: underline;
+}
+
+/* --- Div Styling for Positioning and Content Blocks --- */
+
+/* Div 1: Header Div */
+.header-div {
+    background-color: #0047BA;
+    padding: 20px 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* Div 2: Navigation Div */
+.nav-div {
+    text-align: center;
+    padding: 10px 0;
+    background-color: #00296a;
+    border-bottom: 1px solid #0047BA;
+}
+
+/* Div 3: Main Content Div (for positioning/margin) */
+.content-div {
+    width: 80%;
+    margin: 40px auto; /* Centers the content block */
+    padding: 20px;
+    background-color: #00296a;
+    border-radius: 8px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Specific image and video styling */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 15px auto;
+    border: 3px solid #00296a;
+    border-radius: 4px;
+}
+
+iframe {
+    display: block;
+    margin: 25px auto;
+    max-width: 100%;
+}
+
+.tableau-embed {
+    text-align: center; /* Center the Tableau iframe */
+    padding: 20px 0;
+}
+
+/* Footer div */
+.footer-div {
+    text-align: center;
+    padding: 15px 0;
+    background-color: #00296a;
+    margin-top: 30px;
+}
+
+.footer-div p {
+    font-size: 1em;
+    color: #ebecf7;
+}

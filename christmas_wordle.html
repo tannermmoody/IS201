@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christmas Wordle</title>
+
+    <style>
+        :root {
+            /* Color Variables */
+            --christmas-red: #c0392b; /* Nice deep red */
+            --christmas-green: #27ae60; /* Deep green */
+            --grid-bg: #ecf0f1; /* Off-white for grid */
+            --key-bg: #bdc3c7; /* Light gray for keyboard */
+            --text-color: #34495e; /* Dark slate */
+            
+            /* Wordle Colors */
+            --color-correct: #2ecc71; 
+            --color-present: #f1c40f; 
+            --color-absent: #7f8c8d; 
+            --color-empty: #ffffff;
+        }
+
+        body {
+            font-family: 'Arial Black', Gadget, sans-serif;
+            background-color: var(--christmas-red);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            position: relative;
+        }
+
+        .game-title {
+            color: var(--grid-bg);
+            text-shadow: 2px 2px var(--christmas-green);
+            font-size: 3em;
+            margin: 10px 0 20px 0;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        /* --- Christmas Lights Border (Decorative Element) --- */
+        .light-string {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: -1; 
+        }
+
+        .light {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            box-shadow: 0 0 5px #fff, 0 0 10px;
+            animation: pulse 1s infinite alternate;
+        }
+
+        /* Positioning the lights along the border */
+        .light:nth-child(1) { top: 10px; left: 10%; background: yellow; }
+        .light:nth-child(2) { top: 10px; right: 20%; background: red; animation-delay: 0.2s; }
+        .light:nth-child(3) { bottom: 10px; left: 50%; background: var(--christmas-green); animation-delay: 0.4s; }
+        .light:nth-child(4) { bottom: 10%; right: 5%; background: cyan; animation-delay: 0.6s; }
+        .light:nth-child(5) { top: 50%; left: 5%; background: magenta; animation-delay: 0.8s; }
+        .light:nth-child(6) { top: 20%; right: 10px; background: orange; animation-delay: 1s; }
+        
+        @keyframes pulse {
+            from { opacity: 0.5; }
+            to { opacity: 1; }
+        }
+
+        /* --- Wordle Grid Styling --- */
+        #game-grid {
+            display: grid;
+            grid-template-rows: repeat(6, 1fr); 
+            grid-template-columns: repeat(5, 1fr); 
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        .tile {
+            width: 100%;
+            height: 50px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--text-color);
+            background-color: var(--color-empty);
+            border: 2px solid var(--key-bg);
+            box-sizing: border-box;
+            transition: background-color 0.5s, transform 0.1s;
+        }
+
+        /* Tile Status Colors */
+        .tile.correct { background-color: var(--color-correct); color: white; border-color: var(--color-correct); }
+        .tile.present { background-color: var(--color-present); color: white; border-color: var(--color-present); }
+        .tile.absent { background-color: var(--color-absent); color: white; border-color: var(--color-absent); }
+
+        /* --- Keyboard Styling --- */
+        #keyboard {
+            user-select: none;
+        }
+        
+        .key-row {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+        
+        /* *** FIX: Center the third row keys *** */
+        .key-row:last-child {
+            /* The third row needs to accommodate the 'big' keys */
+            justify-content: space-between; 
+            padding: 0 5px; /* Add slight padding for visual balance */
+        }
+        /* ************************************ */
+
+        .key {
+            background-color: var(--key-bg);
+            color: var(--text-color);
+            border-radius: 4px;
+            padding: 10px 10px;
+            margin: 0 4px;
+            font-size: 0.9em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            min-width: 25px;
+            text-align: center;
+            line-height: 1;
+        }
+        
+        .key.big-key {
+            /* Give the big keys a fixed width and margins to balance the row */
+            width: 70px; /* Set a specific width */
+            padding: 10px 0; /* Remove horizontal padding and use the fixed width */
+            margin: 0 2px; /* Reduce side margin slightly */
+            flex-grow: 0; /* Important: Don't let it grow infinitely */
+        }
+
+        .key:hover {
+            background-color: #aeb6bf;
+        }
+
+        /* Keyboard Status Colors */
+        .key.correct { background-color: var(--color-correct); color: white; }
+        .key.present { background-color: var(--color-present); color: white; }
+        .key.absent { background-color: var(--color-absent); color: white; }
+
+        /* --- Message/Modal Styling --- */
+        #message-box {
+            position: absolute;
+            top: 15%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--christmas-green);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            font-size: 1.2em;
+            display: none; 
+            z-index: 10;
+        }
+        
+        .navigation {
+            margin-top: 25px;
+            font-size: 0.9em;
+        }
+        .navigation a {
+            color: var(--christmas-green);
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .navigation a:hover {
+            text-decoration: underline;
+        }
+
+    </style>
+</head>
+<body>
+    
+    <div class="light-string">
+        <div class="light"></div>
+        <div class="light"></div>
+        <div class="light"></div>
+        <div class="light"></div>
+        <div class="light"></div>
+        <div class="light"></div>
+    </div>
+
+    <h1 class="game-title">Jolly Wordle</h1>
+
+    <div id="message-box"></div>
+
+    <div class="container">
+        
+        <div id="game-grid">
+            </div>
+
+        <div id="keyboard">
+            <div class="key-row">
+                <div class="key" data-key="Q">Q</div><div class="key" data-key="W">W</div><div class="key" data-key="E">E</div><div class="key" data-key="R">R</div><div class="key" data-key="T">T</div><div class="key" data-key="Y">Y</div><div class="key" data-key="U">U</div><div class="key" data-key="I">I</div><div class="key" data-key="O">O</div><div class="key" data-key="P">P</div>
+            </div>
+            <div class="key-row">
+                <div class="key" data-key="A">A</div><div class="key" data-key="S">S</div><div class="key" data-key="D">D</div><div class="key" data-key="F">F</div><div class="key" data-key="G">G</div><div class="key" data-key="H">H</div><div class="key" data-key="J">J</div><div class="key" data-key="K">K</div><div class="key" data-key="L">L</div>
+            </div>
+            <div class="key-row">
+                <div class="key big-key" data-key="ENTER">ENTER</div>
+                <div class="key" data-key="Z">Z</div><div class="key" data-key="X">X</div><div class="key" data-key="C">C</div><div class="key" data-key="V">V</div><div class="key" data-key="B">B</div><div class="key" data-key="N">N</div><div class="key" data-key="M">M</div>
+                <div class="key big-key" data-key="BACKSPACE">BACK</div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="navigation">
+        <a href="scratchpage.html">Go back to Last Page</a>
+    </div>
+
+    <script>
+        const ANSWER_LIST = [
+            "BELLS", "TREES", "SANTA", "LIGHT", "JOLLY", 
+            "ANGEL", "CAROL", "SNOWY", "HOLLY", "SOCKS", 
+            "CANDY", "GLOVE" , "JESUS", "GIFTS", "NORTH",
+            "SLEDS", "FROST", "ELVES", "CHEER", "MERRY"
+        ];
+        const WORD_LENGTH = 5;
+        const MAX_GUESSES = 6;
+
+        let answer = "";
+        let currentGuess = [];
+        let currentRow = 0;
+        let isGameOver = false;
+
+        const grid = document.getElementById('game-grid');
+        const messageBox = document.getElementById('message-box');
+        
+        // --- Initialization ---
+        function initGame() {
+            // Select a random word from the list and convert to uppercase
+            answer = ANSWER_LIST[Math.floor(Math.random() * ANSWER_LIST.length)];
+            
+            // For testing: console.log("Answer:", answer); 
+            
+            currentGuess = [];
+            currentRow = 0;
+            isGameOver = false;
+            
+            // Clear message box
+            messageBox.style.display = 'none';
+            messageBox.textContent = '';
+            
+            // Reset grid and keyboard
+            grid.innerHTML = '';
+            createGrid();
+            resetKeyboard();
+        }
+
+        function createGrid() {
+            // Create 6 rows of 5 tiles
+            for (let r = 0; r < MAX_GUESSES; r++) {
+                for (let c = 0; c < WORD_LENGTH; c++) {
+                    const tile = document.createElement('div');
+                    tile.classList.add('tile');
+                    tile.id = `tile-${r}-${c}`;
+                    grid.appendChild(tile);
+                }
+            }
+        }
+        
+        function resetKeyboard() {
+            // Clear status classes from keys
+            document.querySelectorAll('.key').forEach(key => {
+                key.classList.remove('correct', 'present', 'absent');
+            });
+        }
+        
+        // --- Game Logic ---
+
+        function updateGrid() {
+            // Update the tiles for the current row
+            const baseIndex = currentRow * WORD_LENGTH;
+            for (let i = 0; i < WORD_LENGTH; i++) {
+                const tile = document.getElementById(`tile-${currentRow}-${i}`);
+                if (i < currentGuess.length) {
+                    tile.textContent = currentGuess[i];
+                    tile.style.borderColor = 'var(--text-color)';
+                } else {
+                    tile.textContent = '';
+                    tile.style.borderColor = 'var(--key-bg)';
+                }
+            }
+        }
+
+        function handleKey(key) {
+            if (isGameOver) return;
+
+            key = key.toUpperCase();
+
+            if (key === "ENTER") {
+                if (currentGuess.length === WORD_LENGTH) {
+                    checkGuess();
+                } else {
+                    showMessage("Not enough letters!", 1000);
+                }
+            } else if (key === "BACKSPACE" || key === "DELETE") {
+                currentGuess.pop();
+                updateGrid();
+            } else if (key.length === 1 && key.match(/[A-Z]/)) {
+                if (currentGuess.length < WORD_LENGTH) {
+                    currentGuess.push(key);
+                    updateGrid();
+                }
+            }
+        }
+
+        function checkGuess() {
+            const guessWord = currentGuess.join('');
+            const answerMap = {};
+            const guessTiles = [];
+            
+            // 1. Map answer letters and initialize tile elements
+            for (let i = 0; i < WORD_LENGTH; i++) {
+                const letter = answer[i];
+                answerMap[letter] = (answerMap[letter] || 0) + 1;
+                guessTiles.push(document.getElementById(`tile-${currentRow}-${i}`));
+            }
+
+            // 2. First Pass: Check for CORRECT positions
+            for (let i = 0; i < WORD_LENGTH; i++) {
+                if (guessWord[i] === answer[i]) {
+                    guessTiles[i].classList.add('correct');
+                    updateKey(guessWord[i], 'correct');
+                    answerMap[guessWord[i]]--;
+                }
+            }
+
+            // 3. Second Pass: Check for PRESENT and ABSENT
+            for (let i = 0; i < WORD_LENGTH; i++) {
+                const tile = guessTiles[i];
+                const letter = guessWord[i];
+                
+                // Skip letters already marked as correct
+                if (tile.classList.contains('correct')) continue; 
+
+                if (answerMap[letter] > 0) {
+                    tile.classList.add('present');
+                    updateKey(letter, 'present');
+                    answerMap[letter]--;
+                } else {
+                    tile.classList.add('absent');
+                    updateKey(letter, 'absent');
+                }
+            }
+
+            // 4. Check Win/Loss conditions
+            if (guessWord === answer) {
+                isGameOver = true;
+                showMessage("MERRY CHRISTMAS! You guessed it!", 3000);
+            } else if (currentRow === MAX_GUESSES - 1) {
+                isGameOver = true;
+                showMessage(`Game Over! The word was ${answer}.`, 5000);
+            } else {
+                // Prepare for next guess
+                currentRow++;
+                currentGuess = [];
+            }
+        }
+        
+        function updateKey(letter, status) {
+            const keyElement = document.querySelector(`.key[data-key="${letter}"]`);
+            if (!keyElement) return;
+
+            const currentStatus = keyElement.classList[1]; // correct, present, or absent
+            
+            // Only upgrade a status (e.g., absent -> present, present -> correct)
+            if (status === 'correct' || (status === 'present' && currentStatus !== 'correct')) {
+                keyElement.classList.remove('absent', 'present');
+                keyElement.classList.add(status);
+            } else if (!currentStatus) {
+                // Set status if no status is currently applied
+                keyElement.classList.add(status);
+            }
+        }
+
+        function showMessage(message, duration = 1500) {
+            messageBox.textContent = message;
+            messageBox.style.display = 'block';
+            setTimeout(() => {
+                messageBox.style.display = 'none';
+            }, duration);
+        }
+
+        // --- Event Listeners ---
+
+        // Keyboard press listener
+        document.addEventListener('keydown', (e) => {
+            if (e.repeat) return; // Ignore hold key
+            handleKey(e.key);
+        });
+
+        // On-screen keyboard listener
+        document.getElementById('keyboard').addEventListener('click', (e) => {
+            const key = e.target.closest('.key');
+            if (key) {
+                handleKey(key.dataset.key);
+            }
+        });
+
+        // Start the game on load
+        window.onload = initGame;
+    </script>
+</body>
+</html>
